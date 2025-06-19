@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personalized Fitness Program</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .container-wrapper {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .form-section-title {
+            font-size: 1.5rem; /* Equivalent to text-2xl */
+            font-weight: 700; /* Equivalent to font-bold */
+            color: #1f2937; /* Equivalent to text-gray-900 */
+            margin-bottom: 1.5rem; /* Equivalent to mb-6 */
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb; /* Light gray border */
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease-in-out;
+        }
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: #6366f1; /* Indigo-500 */
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        .btn-primary {
+            background-color: #6366f1; /* Indigo-500 */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            background-color: #4f46e5; /* Indigo-600 */
+            transform: translateY(-1px);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #6366f1;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .program-output {
+            white-space: pre-wrap; /* Preserves whitespace and wraps text */
+            word-wrap: break-word; /* Breaks long words */
+            background-color: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            margin-top: 1.5rem;
+            color: #374151;
+            line-height: 1.6;
+        }
+    </style>
+    <!-- jsPDF CDN for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="p-4">
+    <div class="container-wrapper">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Personalized Fitness & Health Program Questionnaire</h1>
+
+        <form id="programForm" class="space-y-8">
+            <!-- SECTION 1: PERSONAL DETAILS -->
+            <div class="form-section">
+                <h2 class="form-section-title">SECTION 1: PERSONAL DETAILS</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label for="fullName" class="form-label">What is your full name?</label>
+                        <input type="text" id="fullName" name="fullName" class="form-input" required>
+                    </div>
+                    <div>
+                        <label for="emailAddress" class="form-label">What is your email address?</label>
+                        <input type="email" id="emailAddress" name="emailAddress" class="form-input" required>
+                    </div>
+                    <div>
+                        <label for="age" class="form-label">How old are you?</label>
+                        <input type="number" id="age" name="age" class="form-input" required min="10" max="100">
+                    </div>
+                    <div>
+                        <label for="gender" class="form-label">What is your gender?</label>
+                        <select id="gender" name="gender" class="form-select" required>
+                            <option value="">Select...</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Non-binary">Non-binary</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="heightCm" class="form-label">What is your height? (in cm)</label>
+                        <input type="number" id="heightCm" name="heightCm" class="form-input" required min="100" max="250">
+                    </div>
+                    <div>
+                        <label for="weightKg" class="form-label">What is your current weight? (in kg)</label>
+                        <input type="number" id="weightKg" name="weightKg" class="form-input" required min="30" max="200">
+                    </div>
+                    <div>
+                        <label for="medicalConditions" class="form-label">Do you have any medical conditions, injuries, or dietary restrictions?</label>
+                        <textarea id="medicalConditions" name="medicalConditions" rows="3" class="form-textarea" placeholder="E.g., gluten intolerance, knee injury, diabetes..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: FITNESS GOALS -->
+            <div class="form-section">
+                <h2 class="form-section-title">SECTION 2: FITNESS GOALS</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label for="fitnessGoals" class="form-label">What are your main fitness goals?</label>
+                        <textarea id="fitnessGoals" name="fitnessGoals" rows="3" class="form-textarea" required placeholder="E.g., run a sub-20 5km, lose 10kg, build muscle, bench 100kg..."></textarea>
+                    </div>
+                    <div>
+                        <label for="goalTimeline" class="form-label">How soon do you want to achieve your goals?</label>
+                        <select id="goalTimeline" name="goalTimeline" class="form-select" required>
+                            <option value="">Select...</option>
+                            <option value="1 month">1 month</option>
+                            <option value="3 months">3 months</option>
+                            <option value="6 months">6 months</option>
+                            <option value="12 months">12 months</option>
+                            <option value="No specific timeframe">No specific timeframe</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="currentFitnessLevel" class="form-label">How would you describe your current fitness level?</label>
+                        <select id="currentFitnessLevel" name="currentFitnessLevel" class="form-select" required>
+                            <option value="">Select...</option>
+                            <option value="Beginner">Beginner</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Advanced">Advanced</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: TRAINING PREFERENCES -->
+            <div class="form-section">
+                <h2 class="form-section-title">SECTION 3: TRAINING PREFERENCES</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label for="trainingDaysPerWeek" class="form-label">How many days per week do you want to train?</label>
+                        <input type="number" id="trainingDaysPerWeek" name="trainingDaysPerWeek" class="form-input" required min="1" max="7">
+                    </div>
+                    <div>
+                        <label for="gymAccess" class="form-label">Do you currently have access to a gym?</label>
+                        <select id="gymAccess" name="gymAccess" class="form-select" required>
+                            <option value="">Select...</option>
+                            <option value="Yes – Full gym access">Yes – Full gym access</option>
+                            <option value="Yes – Limited gym access">Yes – Limited gym access</option>
+                            <option value="No – Home only">No – Home only</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="homeEquipment" class="form-label">If training at home, what equipment do you have access to?</label>
+                        <textarea id="homeEquipment" name="homeEquipment" rows="3" class="form-textarea" placeholder="E.g., dumbbells, resistance bands, pull-up bar, treadmill..."></textarea>
+                    </div>
+                    <div>
+                        <label for="exerciseTypes" class="form-label">What types of exercise do you want included in your plan? (You can select more than one)</label>
+                        <select id="exerciseTypes" name="exerciseTypes" class="form-select" multiple required>
+                            <option value="Strength Training">Strength Training</option>
+                            <option value="Hypertrophy (Muscle Growth)">Hypertrophy (Muscle Growth)</option>
+                            <option value="Cardio (Running, HIIT)">Cardio (Running, HIIT)</option>
+                            <option value="Mobility & Stretching">Mobility & Stretching</option>
+                            <option value="Endurance">Endurance</option>
+                            <option value="Sport-specific training">Sport-specific training</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="sportsParticipation" class="form-label">Do you participate in any sports or other physical activities weekly?</label>
+                        <select id="sportsParticipation" name="sportsParticipation" class="form-select" required>
+                            <option value="">Select...</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div id="sportsDescriptionDiv" class="hidden">
+                        <label for="sportsDescription" class="form-label">If yes, please describe them, including how often and on what days.</label>
+                        <textarea id="sportsDescription" name="sportsDescription" rows="3" class="form-textarea" placeholder="E.g., soccer training Tuesday & Thursday, match Saturday, run club Sunday..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: NUTRITION & MEALS -->
+            <div class="form-section">
+                <h2 class="form-section-title">SECTION 4: NUTRITION & MEALS</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label for="dietaryPreference" class="form-label">What is your dietary preference?</label>
+                        <select id="dietaryPreference" name="dietaryPreference" class="form-select" required>
+                            <option value="">Select...</option>
+                            <option value="No preference">No preference</option>
+                            <option value="Vegetarian">Vegetarian</option>
+                            <option value="Vegan">Vegan</option>
+                            <option value="Pescatarian">Pescatarian</option>
+                            <option value="Low-carb">Low-carb</option>
+                            <option value="High-protein">High-protein</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="mealsPerDay" class="form-label">How many meals per day should be planned for you?</label>
+                        <select id="mealsPerDay" name="mealsPerDay" class="form-select" required>
+                            <option value="">Select...</option>
+                            <option value="2 meals">2 meals</option>
+                            <option value="3 meals">3 meals</option>
+                            <option value="4 meals">4 meals</option>
+                            <option value="All meals">All meals</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="mealControl" class="form-label">Do you have control over all your meals?</label>
+                        <select id="mealControl" name="mealControl" class="form-select" required>
+                            <option value="">Select...</option>
+                            <option value="Yes – I plan all my meals">Yes – I plan all my meals</option>
+                            <option value="No – I live at home/others cook some meals">No – I live at home/others cook some meals</option>
+                        </select>
+                    </div>
+                    <div id="mealControlExplanationDiv" class="hidden">
+                        <label for="mealControlExplanation" class="form-label">If some meals are out of your control, please explain which ones and any preferences or limitations.</label>
+                        <textarea id="mealControlExplanation" name="mealControlExplanation" rows="3" class="form-textarea" placeholder="E.g., dinner is made by my parents, I usually eat what’s made but can ask for healthy versions..."></textarea>
+                    </div>
+                    <div>
+                        <label for="groceryList" class="form-label">Do you want a grocery shopping list generated from your meal plan?</label>
+                        <select id="groceryList" name="groceryList" class="form-select" required>
+                            <option value="">Select...</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="dislikedFoods" class="form-label">Are there any foods you dislike or want to avoid?</label>
+                        <textarea id="dislikedFoods" name="dislikedFoods" rows="3" class="form-textarea" placeholder="E.g., no mushrooms, dislike tuna, allergic to peanuts..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 5: ADDITIONAL PREFERENCES -->
+            <div class="form-section">
+                <h2 class="form-section-title">SECTION 5: ADDITIONAL PREFERENCES</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label for="stretchingMobility" class="form-label">Do you want a stretching or mobility routine included?</label>
+                        <select id="stretchingMobility" name="stretchingMobility" class="form-select" required>
+                            <option value="">Select...</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                            <option value="Maybe – if needed">Maybe – if needed</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="trainingTimeOfDay" class="form-label">What time of day do you typically train or want to train?</label>
+                        <select id="trainingTimeOfDay" name="trainingTimeOfDay" class="form-select" required>
+                            <option value="">Select...</option>
+                            <option value="Morning">Morning</option>
+                            <option value="Afternoon">Afternoon</option>
+                            <option value="Evening">Evening</option>
+                            <option value="No preference">No preference</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="restDays" class="form-label">Do you want rest days scheduled in your plan?</label>
+                        <select id="restDays" name="restDays" class="form-select" required>
+                            <option value="">Select...</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                            <option value="Up to you">Up to you</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="calendarOutline" class="form-label">Would you like a weekly calendar-style outline of your plan?</label>
+                        <select id="calendarOutline" name="calendarOutline" class="form-select" required>
+                            <option value="">Select...</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 6: FINAL NOTES -->
+            <div class="form-section">
+                <h2 class="form-section-title">SECTION 6: FINAL NOTES</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label for="additionalNotes" class="form-label">Is there anything else you'd like us to consider when building your plan?</label>
+                        <textarea id="additionalNotes" name="additionalNotes" rows="3" class="form-textarea" placeholder="E.g., I have shift work so my schedule changes weekly..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary w-full flex items-center justify-center space-x-2">
+                <span id="submitButtonText">Generate My Program</span>
+                <div id="loadingSpinner" class="loading-spinner hidden"></div>
+            </button>
+        </form>
+
+        <div id="programOutputSection" class="mt-8 hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Your Personalized Program</h2>
+            <div id="programOutput" class="program-output">
+                <!-- AI generated program will be displayed here -->
+            </div>
+            <div class="flex justify-center mt-6">
+                <button id="downloadPdfBtn" class="btn-primary flex items-center justify-center space-x-2">
+                    <span>Download Program as PDF</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Initialize Firebase variables (provided by Canvas environment)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Firebase imports - Although not used for this specific app (no data persistence needed),
+        // these are included as per standard Canvas environment setup for completeness.
+        // If storage were required (e.g., saving programs), these would be necessary.
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"; // Only if you need to save to Firestore
+
+        // Initialize Firebase if config is available
+        let app, auth, db;
+        if (Object.keys(firebaseConfig).length > 0) {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            // db = getFirestore(app); // Uncomment if Firestore is needed
+
+            // Sign in anonymously or with custom token if available
+            async function authenticateFirebase() {
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("Signed in with custom token.");
+                    } else {
+                        await signInAnonymously(auth);
+                        console.log("Signed in anonymously.");
+                    }
+                } catch (error) {
+                    console.error("Firebase authentication error:", error);
+                }
+            }
+            authenticateFirebase();
+        } else {
+            console.warn("Firebase configuration not found. Firestore features will be unavailable.");
+        }
+
+
+        const form = document.getElementById('programForm');
+        const submitButtonText = document.getElementById('submitButtonText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const programOutputSection = document.getElementById('programOutputSection');
+        const programOutputDiv = document.getElementById('programOutput');
+        const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+
+        // Get elements for conditional display
+        const sportsParticipationSelect = document.getElementById('sportsParticipation');
+        const sportsDescriptionDiv = document.getElementById('sportsDescriptionDiv');
+        const mealControlSelect = document.getElementById('mealControl');
+        const mealControlExplanationDiv = document.getElementById('mealControlExplanationDiv');
+
+        // Add event listeners for conditional fields
+        sportsParticipationSelect.addEventListener('change', () => {
+            if (sportsParticipationSelect.value === 'Yes') {
+                sportsDescriptionDiv.classList.remove('hidden');
+                document.getElementById('sportsDescription').setAttribute('required', 'true');
+            } else {
+                sportsDescriptionDiv.classList.add('hidden');
+                document.getElementById('sportsDescription').removeAttribute('required');
+                document.getElementById('sportsDescription').value = ''; // Clear value if hidden
+            }
+        });
+
+        mealControlSelect.addEventListener('change', () => {
+            if (mealControlSelect.value === 'No – I live at home/others cook some meals') {
+                mealControlExplanationDiv.classList.remove('hidden');
+                document.getElementById('mealControlExplanation').setAttribute('required', 'true');
+            } else {
+                mealControlExplanationDiv.classList.add('hidden');
+                document.getElementById('mealControlExplanation').removeAttribute('required');
+                document.getElementById('mealControlExplanation').value = ''; // Clear value if hidden
+            }
+        });
+
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Show loading state
+            submitButtonText.textContent = 'Generating...';
+            loadingSpinner.classList.remove('hidden');
+            form.querySelector('button[type="submit"]').disabled = true;
+            programOutputSection.classList.add('hidden'); // Hide previous output
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            // Handle multi-select for exerciseTypes
+            const exerciseTypesSelected = Array.from(document.getElementById('exerciseTypes').selectedOptions).map(option => option.value).join(', ');
+
+            const prompt = `Generate a highly personalized 4-week fitness and health program based on the following detailed user information.
+            The program should be comprehensive, structured with clear daily/weekly plans, and include sections for:
+            1.  **User Profile Summary:** Briefly reiterate user's key details and stated restrictions.
+            2.  **Overall Program Goal & Timeline:** Explicitly state the main fitness goals and the desired timeline.
+            3.  **Weekly Breakdown (Week 1 to Week 4):**
+                * For each week, provide a daily workout routine tailored to their preferences (e.g., strength, cardio, mobility).
+                * Include specific exercise examples with suggested sets and reps where applicable.
+                * Clearly incorporate their gym access or home equipment.
+                * Integrate sports or physical activities if mentioned.
+                * Respect preferred training days per week and time of day.
+                * Include stretching/mobility if requested.
+                * Include rest days if requested.
+            4.  **Nutrition Guidelines:**
+                * General dietary advice aligned with their goals, dietary preferences, and meal control.
+                * Provide examples of meal types (breakfast, lunch, dinner, snacks) suitable for their goals and restrictions/dislikes.
+                * Address the grocery list preference.
+            5.  **Mindset & Recovery:**
+                * Emphasize the importance of sleep, hydration, and mental well-being relevant to their plan.
+                * Offer tips for staying motivated and consistent.
+            6.  **Calendar Outline (if requested):** Provide a simple weekly calendar view if the user asks for it.
+            7.  **Disclaimer:** Add a standard disclaimer about consulting a professional before starting any new program.
+
+            User Details:
+            Full Name: ${data.fullName}
+            Email: ${data.emailAddress}
+            Age: ${data.age}
+            Gender: ${data.gender}
+            Height: ${data.heightCm} cm
+            Weight: ${data.weightKg} kg
+            Medical Conditions/Injuries/Dietary Restrictions (Self-reported): ${data.medicalConditions || 'None'}
+
+            Fitness Goals:
+            Main Fitness Goals: ${data.fitnessGoals}
+            Goal Timeline: ${data.goalTimeline}
+            Current Fitness Level: ${data.currentFitnessLevel}
+
+            Training Preferences:
+            Desired Training Days per Week: ${data.trainingDaysPerWeek}
+            Gym Access: ${data.gymAccess}
+            Home Equipment: ${data.homeEquipment || 'Not applicable / None specified'}
+            Desired Exercise Types: ${exerciseTypesSelected}
+            Sports/Physical Activities Participation: ${data.sportsParticipation}
+            Sports Description: ${data.sportsDescription || 'None'}
+
+            Nutrition & Meals:
+            Dietary Preference: ${data.dietaryPreference}
+            Meals Per Day: ${data.mealsPerDay}
+            Control Over All Meals: ${data.mealControl}
+            Meal Control Explanation: ${data.mealControlExplanation || 'Not applicable'}
+            Grocery Shopping List Desired: ${data.groceryList}
+            Disliked/Avoided Foods: ${data.dislikedFoods || 'None'}
+
+            Additional Preferences:
+            Stretching/Mobility Routine: ${data.stretchingMobility}
+            Preferred Training Time of Day: ${data.trainingTimeOfDay}
+            Rest Days Scheduled: ${data.restDays}
+            Weekly Calendar Outline: ${data.calendarOutline}
+            Additional Notes: ${data.additionalNotes || 'None'}
+
+            Please ensure the program is easy to understand, uses clear headings (like markdown H2 for sections, H3 for sub-sections), bullet points, and provides actionable advice. Structure the output clearly for PDF readability.`;
+
+            try {
+                // Gemini API call
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+                const payload = { contents: chatHistory };
+                const apiKey = "AIzaSyBMOAbAN3UcdRzaErQ8hJhjgfNvqpVP5XM";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`API Error: ${response.status} - ${errorData.error.message || 'Unknown error'}`);
+                }
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const generatedProgram = result.candidates[0].content.parts[0].text;
+                    programOutputDiv.textContent = generatedProgram;
+                    programOutputSection.classList.remove('hidden'); // Show the output section
+                    downloadPdfBtn.onclick = () => generatePdf(generatedProgram, data.fullName);
+                } else {
+                    programOutputDiv.textContent = 'Could not generate a program. Please try again.';
+                    console.error('Unexpected API response structure:', result);
+                }
+
+            } catch (error) {
+                programOutputDiv.textContent = `An error occurred: ${error.message}. Please try again later.`;
+                console.error('Error generating program:', error);
+            } finally {
+                // Hide loading state
+                submitButtonText.textContent = 'Generate My Program';
+                loadingSpinner.classList.add('hidden');
+                form.querySelector('button[type="submit"]').disabled = false;
+            }
+        });
+
+        // Function to generate PDF
+        function generatePdf(programText, customerName) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Set document properties
+            doc.setProperties({
+                title: `${customerName}'s Personalized Fitness Program`,
+                subject: 'Your custom fitness and health plan',
+                author: 'Your Fitness Program Generator',
+            });
+
+            // Set basic styles
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(12);
+            const lineHeight = 10;
+            let y = 20;
+            const margin = 20;
+            const maxWidth = doc.internal.pageSize.getWidth() - 2 * margin;
+
+            // Add title
+            doc.setFontSize(22);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`${customerName}'s Personalized Fitness Program`, doc.internal.pageSize.getWidth() / 2, y, { align: 'center' });
+            y += 15;
+
+            // Add horizontal line
+            doc.setDrawColor(100, 100, 100);
+            doc.line(margin, y, doc.internal.pageSize.getWidth() - margin, y);
+            y += 10;
+
+            // Split the text into lines and add to PDF
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+
+            // Process text to handle headings and paragraphs
+            const lines = programText.split('\n');
+            lines.forEach(line => {
+                if (y > doc.internal.pageSize.getHeight() - margin) {
+                    doc.addPage();
+                    y = margin + 10; // Reset y for new page
+                    doc.setFontSize(10);
+                    doc.setTextColor(150, 150, 150);
+                    doc.text(`Page ${doc.internal.getNumberOfPages()}`, doc.internal.pageSize.getWidth() - margin, doc.internal.pageSize.getHeight() - 10, { align: 'right' });
+                    doc.setTextColor(0, 0, 0); // Reset color
+                    doc.setFontSize(12);
+                }
+
+                if (line.startsWith('## ')) {
+                    doc.setFontSize(18);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(line.substring(3).trim(), margin, y);
+                    y += lineHeight + 5;
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'normal');
+                } else if (line.startsWith('### ')) {
+                    doc.setFontSize(14);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(line.substring(4).trim(), margin, y);
+                    y += lineHeight + 3;
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'normal');
+                } else if (line.startsWith('* ') || line.startsWith('- ')) {
+                    // Handle list items
+                    const bullet = '\u2022 '; // Unicode for bullet point
+                    const textLines = doc.splitTextToSize(bullet + line.substring(2).trim(), maxWidth - 10);
+                    textLines.forEach(l => {
+                        doc.text(l, margin + 5, y); // Indent for bullets
+                        y += lineHeight;
+                    });
+                } else if (line.trim() !== '') {
+                    const textLines = doc.splitTextToSize(line.trim(), maxWidth);
+                    textLines.forEach(l => {
+                        doc.text(l, margin, y);
+                        y += lineHeight;
+                    });
+                } else {
+                    y += lineHeight / 2; // Add some space for empty lines
+                }
+            });
+
+            // Save the PDF
+            doc.save(`${customerName}_Fitness_Program.pdf`);
+        }
+    </script>
+</body>
+</html>
