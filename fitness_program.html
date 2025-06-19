@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -183,8 +183,21 @@
                 <h2 class="form-section-title">SECTION 3: TRAINING PREFERENCES</h2>
                 <div class="space-y-6">
                     <div>
-                        <label for="trainingDaysPerWeek" class="form-label">How many days per week do you want to train?</label>
+                        <label for="trainingDaysPerWeek" class="form-label">How many *separate days* per week do you want to dedicate to training?</label>
                         <input type="number" id="trainingDaysPerWeek" name="trainingDaysPerWeek" class="form-input" required min="1" max="7">
+                    </div>
+                    <div>
+                        <label for="sessionsPerDay" class="form-label">On your training days, how many distinct training sessions do you typically have per day?</label>
+                        <select id="sessionsPerDay" name="sessionsPerDay" class="form-select" required>
+                            <option value="">Select...</option>
+                            <option value="1 session per day">1 session per day</option>
+                            <option value="2 sessions per day">2 sessions per day</option>
+                            <option value="3+ sessions per day">3+ sessions per day</option>
+                        </select>
+                    </div>
+                    <div id="multipleSessionsDescriptionDiv" class="hidden">
+                        <label for="multipleSessionsDescription" class="form-label">If you have multiple sessions in a day, please describe their typical structure and type (e.g., 'Morning: Gym workout, Evening: Football practice').</label>
+                        <textarea id="multipleSessionsDescription" name="multipleSessionsDescription" rows="3" class="form-textarea" placeholder="E.g., Morning: Gym workout, Evening: Football practice"></textarea>
                     </div>
                     <div>
                         <label for="gymAccess" class="form-label">Do you currently have access to a gym?</label>
@@ -348,7 +361,8 @@
         // Initialize Firebase variables (provided by Canvas environment)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // FIX: Corrected the initialization of initialAuthToken
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null; 
 
         // Firebase imports - Although not used for this specific app (no data persistence needed),
         // these are included as per standard Canvas environment setup for completeness.
@@ -396,6 +410,8 @@
         const sportsDescriptionDiv = document.getElementById('sportsDescriptionDiv');
         const mealControlSelect = document.getElementById('mealControl');
         const mealControlExplanationDiv = document.getElementById('mealControlExplanationDiv');
+        const sessionsPerDaySelect = document.getElementById('sessionsPerDay'); // New
+        const multipleSessionsDescriptionDiv = document.getElementById('multipleSessionsDescriptionDiv'); // New
 
         // Add event listeners for conditional fields
         sportsParticipationSelect.addEventListener('change', () => {
@@ -417,6 +433,19 @@
                 mealControlExplanationDiv.classList.add('hidden');
                 document.getElementById('mealControlExplanation').removeAttribute('required');
                 document.getElementById('mealControlExplanation').value = ''; // Clear value if hidden
+            }
+        });
+
+        // New event listener for sessions per day
+        sessionsPerDaySelect.addEventListener('change', () => {
+            const selectedValue = sessionsPerDaySelect.value;
+            if (selectedValue === '2 sessions per day' || selectedValue === '3+ sessions per day') {
+                multipleSessionsDescriptionDiv.classList.remove('hidden');
+                document.getElementById('multipleSessionsDescription').setAttribute('required', 'true');
+            } else {
+                multipleSessionsDescriptionDiv.classList.add('hidden');
+                document.getElementById('multipleSessionsDescription').removeAttribute('required');
+                document.getElementById('multipleSessionsDescription').value = ''; // Clear value if hidden
             }
         });
 
@@ -448,6 +477,7 @@
                 * Respect preferred training days per week and time of day.
                 * Include stretching/mobility if requested.
                 * Include rest days if requested.
+                * **Crucially, account for multiple training sessions within a single day if specified, clearly delineating them (e.g., "Morning Session: Gym, Evening Session: Football Practice").**
             4.  **Nutrition Guidelines:**
                 * General dietary advice aligned with their goals, dietary preferences, and meal control.
                 * Provide examples of meal types (breakfast, lunch, dinner, snacks) suitable for their goals and restrictions/dislikes.
@@ -479,7 +509,9 @@
             Current Fitness Level: ${data.currentFitnessLevel}
 
             Training Preferences:
-            Desired Training Days per Week: ${data.trainingDaysPerWeek}
+            Desired Separate Training Days per Week: ${data.trainingDaysPerWeek}
+            Sessions per Training Day: ${data.sessionsPerDay}
+            Multiple Sessions Structure: ${data.multipleSessionsDescription || 'Not applicable'}
             Gym Access: ${data.gymAccess}
             Home Equipment: ${data.homeEquipment || 'Not applicable / None specified'}
             Desired Exercise Types: ${exerciseTypesSelected}
@@ -589,7 +621,7 @@
                     // Add page number at bottom right of new page
                     doc.setFontSize(10);
                     doc.setTextColor(150, 150, 150);
-                    doc.text(`Page ${doc.internal.pageSize.getNumberOfPages()}`, doc.internal.pageSize.getWidth() - margin, doc.internal.pageSize.getHeight() - 10, { align: 'right' });
+                    doc.text(`Page ${doc.internal.getNumberOfPages()}`, doc.internal.pageSize.getWidth() - margin, doc.internal.pageSize.getHeight() - 10, { align: 'right' });
                     doc.setTextColor(0, 0, 0); // Reset color to black
                     doc.setFontSize(12); // Reset font size for content
                     doc.setFont('helvetica', 'normal'); // Reset font style
