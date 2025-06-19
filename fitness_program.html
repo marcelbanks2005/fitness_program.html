@@ -311,14 +311,6 @@
                             <option value="Up to you">Up to you</option>
                         </select>
                     </div>
-                    <div>
-                        <label for="calendarOutline" class="form-label">Would you like a weekly calendar-style outline of your plan?</label>
-                        <select id="calendarOutline" name="calendarOutline" class="form-select" required>
-                            <option value="">Select...</option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
-                        </select>
-                    </div>
                 </div>
             </div>
 
@@ -463,8 +455,14 @@
             5.  **Mindset & Recovery:**
                 * Emphasize the importance of sleep, hydration, and mental well-being relevant to their plan.
                 * Offer tips for staying motivated and consistent.
-            6.  **Calendar Outline (if requested):** Provide a simple weekly calendar view if the user asks for it.
-            7.  **Disclaimer:** Add a standard disclaimer about consulting a professional before starting any new program.
+            6.  **Disclaimer:** Add a standard disclaimer about consulting a professional before starting any new program.
+
+            **IMPORTANT FORMATTING INSTRUCTIONS:**
+            * Use Markdown Level 2 Headings (##) for main sections (e.g., "## Week 1: Foundation").
+            * Use Markdown Level 3 Headings (###) for sub-sections (e.g., "### Day 1: Strength Training").
+            * Use Markdown bullet points (-) for lists of exercises, meals, or key tips.
+            * Ensure generous line breaks between sections and paragraphs for readability.
+            * **AVOID using Markdown tables; present tabular data using bullet points or clear text lists.**
 
             User Details:
             Full Name: ${data.fullName}
@@ -500,10 +498,9 @@
             Stretching/Mobility Routine: ${data.stretchingMobility}
             Preferred Training Time of Day: ${data.trainingTimeOfDay}
             Rest Days Scheduled: ${data.restDays}
-            Weekly Calendar Outline: ${data.calendarOutline}
             Additional Notes: ${data.additionalNotes || 'None'}
 
-            Please ensure the program is easy to understand, uses clear headings (like markdown H2 for sections, H3 for sub-sections), bullet points, and provides actionable advice. Structure the output clearly for PDF readability.`;
+            Please ensure the program is easy to understand and provides actionable advice. Structure the output clearly for PDF readability.`;
 
             try {
                 // Gemini API call
@@ -511,7 +508,8 @@
                 chatHistory.push({ role: "user", parts: [{ text: prompt }] });
 
                 const payload = { contents: chatHistory };
-                const apiKey = "AIzaSyBMOAbAN3UcdRzaErQ8hJhjgfNvqpVP5XM";
+                const apiKey = "YOUR_API_KEY_HERE"; // IMPORTANT: Replace with your actual Gemini API Key from Google AI Studio.
+
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                 const response = await fetch(apiUrl, {
@@ -565,7 +563,7 @@
             // Set basic styles
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(12);
-            const lineHeight = 10;
+            let lineHeight = 10; // Default line height
             let y = 20;
             const margin = 20;
             const maxWidth = doc.internal.pageSize.getWidth() - 2 * margin;
@@ -581,53 +579,54 @@
             doc.line(margin, y, doc.internal.pageSize.getWidth() - margin, y);
             y += 10;
 
-            // Split the text into lines and add to PDF
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'normal');
-
             // Process text to handle headings and paragraphs
             const lines = programText.split('\n');
             lines.forEach(line => {
+                // Check for page overflow before adding content
                 if (y > doc.internal.pageSize.getHeight() - margin) {
                     doc.addPage();
                     y = margin + 10; // Reset y for new page
+                    // Add page number at bottom right of new page
                     doc.setFontSize(10);
                     doc.setTextColor(150, 150, 150);
-                    doc.text(`Page ${doc.internal.getNumberOfPages()}`, doc.internal.pageSize.getWidth() - margin, doc.internal.pageSize.getHeight() - 10, { align: 'right' });
-                    doc.setTextColor(0, 0, 0); // Reset color
-                    doc.setFontSize(12);
+                    doc.text(`Page ${doc.internal.pageSize.getNumberOfPages()}`, doc.internal.pageSize.getWidth() - margin, doc.internal.pageSize.getHeight() - 10, { align: 'right' });
+                    doc.setTextColor(0, 0, 0); // Reset color to black
+                    doc.setFontSize(12); // Reset font size for content
+                    doc.setFont('helvetica', 'normal'); // Reset font style
                 }
 
                 if (line.startsWith('## ')) {
                     doc.setFontSize(18);
                     doc.setFont('helvetica', 'bold');
                     doc.text(line.substring(3).trim(), margin, y);
-                    y += lineHeight + 5;
+                    y += lineHeight + 8; // More space after main headings
                     doc.setFontSize(12);
                     doc.setFont('helvetica', 'normal');
                 } else if (line.startsWith('### ')) {
                     doc.setFontSize(14);
                     doc.setFont('helvetica', 'bold');
                     doc.text(line.substring(4).trim(), margin, y);
-                    y += lineHeight + 3;
+                    y += lineHeight + 5; // More space after sub-headings
                     doc.setFontSize(12);
                     doc.setFont('helvetica', 'normal');
                 } else if (line.startsWith('* ') || line.startsWith('- ')) {
                     // Handle list items
                     const bullet = '\u2022 '; // Unicode for bullet point
-                    const textLines = doc.splitTextToSize(bullet + line.substring(2).trim(), maxWidth - 10);
+                    // Split text to fit within max width, accounting for bullet indentation
+                    const textLines = doc.splitTextToSize(line.substring(2).trim(), maxWidth - 10);
                     textLines.forEach(l => {
-                        doc.text(l, margin + 5, y); // Indent for bullets
+                        doc.text(bullet + l, margin + 5, y); // Indent for bullets
                         y += lineHeight;
                     });
                 } else if (line.trim() !== '') {
+                    // Handle regular paragraphs
                     const textLines = doc.splitTextToSize(line.trim(), maxWidth);
                     textLines.forEach(l => {
                         doc.text(l, margin, y);
                         y += lineHeight;
                     });
                 } else {
-                    y += lineHeight / 2; // Add some space for empty lines
+                    y += lineHeight / 2; // Add some space for empty lines, making paragraphs separated
                 }
             });
 
