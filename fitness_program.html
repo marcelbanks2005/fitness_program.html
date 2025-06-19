@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -361,7 +361,7 @@
         // Initialize Firebase variables (provided by Canvas environment)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        // FIX: Corrected the initialization of initialAuthToken
+        // FIX: Corrected the initialization to ensure initialAuthToken is correctly assigned
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null; 
 
         // Firebase imports - Although not used for this specific app (no data persistence needed),
@@ -465,34 +465,39 @@
             // Handle multi-select for exerciseTypes
             const exerciseTypesSelected = Array.from(document.getElementById('exerciseTypes').selectedOptions).map(option => option.value).join(', ');
 
-            const prompt = `Generate a highly personalized 4-week fitness and health program based on the following detailed user information.
+            const prompt = `Generate a highly personalized **12-month** fitness and health program based on the following detailed user information. The program should be broken down into **4 progression periods** over the 12 months.
+
             The program should be comprehensive, structured with clear daily/weekly plans, and include sections for:
             1.  **User Profile Summary:** Briefly reiterate user's key details and stated restrictions.
             2.  **Overall Program Goal & Timeline:** Explicitly state the main fitness goals and the desired timeline.
-            3.  **Weekly Breakdown (Week 1 to Week 4):**
-                * For each week, provide a daily workout routine tailored to their preferences (e.g., strength, cardio, mobility).
-                * Include specific exercise examples with suggested sets and reps where applicable.
+            3.  **Program Overview (12 Months, 4 Periods):** Explain the structure of the 12-month program, outlining the focus of each of the 4 progression periods.
+            4.  **Training Plan (Detailed for each of the 4 periods):**
+                * For each period (e.g., Months 1-3, Months 4-6, etc.), provide a daily workout routine tailored to their preferences.
+                * **Crucially, design a proper gym split (e.g., Push/Pull/Legs, Upper/Lower, or specific muscle group days) that allows for adequate rest and is optimal for muscle growth, NOT full-body every day.**
+                * Include specific exercise examples with suggested sets and reps.
                 * Clearly incorporate their gym access or home equipment.
-                * Integrate sports or physical activities if mentioned.
+                * **Account for sporting events:** Plan training sessions intelligently, avoiding heavy leg days or high-impact training the day before a footy game or other major sporting activity.
+                * Integrate sports or physical activities if mentioned, including multiple sessions in a day if specified (e.g., "Morning Session: Gym, Evening Session: Football Practice").
                 * Respect preferred training days per week and time of day.
                 * Include stretching/mobility if requested.
-                * Include rest days if requested.
-                * **Crucially, account for multiple training sessions within a single day if specified, clearly delineating them (e.g., "Morning Session: Gym, Evening Session: Football Practice").**
-            4.  **Nutrition Guidelines:**
+                * Include rest days if requested, considering overall recovery.
+            5.  **Nutrition Guidelines (Detailed for each of the 4 periods):**
                 * General dietary advice aligned with their goals, dietary preferences, and meal control.
-                * Provide examples of meal types (breakfast, lunch, dinner, snacks) suitable for their goals and restrictions/dislikes.
-                * Address the grocery list preference.
-            5.  **Mindset & Recovery:**
+                * For *each day* of the week (within each period), specify the **goal calorie intake**, **protein intake (grams)**, **fats intake (grams)**, and **carbs intake (grams)**. This should be based on their physical activities completed that day and upcoming activities (e.g., carb loading the day before a footy game).
+                * Provide **5 distinct meal options for *each meal type*** (e.g., 5 breakfast options, 5 lunch options, 5 dinner options, 5 snack options), that the client can cycle through.
+                * **IMPORTANT: Do NOT include turkey as a food option in any meal suggestions.**
+            6.  **Recovery & Well-being:**
                 * Emphasize the importance of sleep, hydration, and mental well-being relevant to their plan.
                 * Offer tips for staying motivated and consistent.
-            6.  **Disclaimer:** Add a standard disclaimer about consulting a professional before starting any new program.
+                * **Recommend sauna and ice bath recovery sessions based on their sporting and cardio days**, providing guidance on when and how to integrate them.
+            7.  **Disclaimer:** Add a standard disclaimer about consulting a professional before starting any new program.
 
             **IMPORTANT FORMATTING INSTRUCTIONS:**
-            * Use Markdown Level 2 Headings (##) for main sections (e.g., "## Week 1: Foundation").
-            * Use Markdown Level 3 Headings (###) for sub-sections (e.g., "### Day 1: Strength Training").
+            * Use Markdown Level 2 Headings (##) for main sections (e.g., "## Training Plan - Period 1 (Months 1-3)").
+            * Use Markdown Level 3 Headings (###) for sub-sections (e.g., "### Week 1 Overview", "### Day 1: Push Workout").
             * Use Markdown bullet points (-) for lists of exercises, meals, or key tips.
             * Ensure generous line breaks between sections and paragraphs for readability.
-            * **AVOID using Markdown tables; present tabular data using bullet points or clear text lists.**
+            * **AVOID using Markdown tables; present tabular data using bullet points or clear text lists for each item/day.**
 
             User Details:
             Full Name: ${data.fullName}
@@ -540,7 +545,7 @@
                 chatHistory.push({ role: "user", parts: [{ text: prompt }] });
 
                 const payload = { contents: chatHistory };
-                const apiKey = "AIzaSyBMOAbAN3UcdRzaErQ8hJhjgfNvqpVP5XM";
+                const apiKey = "YOUR_API_KEY_HERE"; // IMPORTANT: Replace with your actual Gemini API Key from Google AI Studio.
 
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
